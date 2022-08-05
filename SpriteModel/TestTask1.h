@@ -61,13 +61,14 @@ public:
 	void compute_A()
 	{
 		A = Matrix(n, n);
-		A(n - 1, n - 1) = integral1([&](double r) { return  (r - (n - 1) * h) * (r - (n - 1) * h) * r; }, (n - 1) * h, R) * mu_0 / (h * h);
+		A(n - 1, n - 1) = integral1([&](double r) { return  (r - (n - 1) * h) * (r - (n - 1) * h) * r;
+		}, (n - 1) * h, R) * mu_0 / (h * h);
 
 		for (int i = 0; i < n - 1; ++i)
 		{
-			A(i, i) = (integral1([&](double r) { return  (r - i* h) * (r - i * h) * r; }, i * h, (i + 1) * h) 
-				+ integral1([&](double r) { return  ((i + 2) * h - r) * ((i + 2) * h - r) * r; }, (i + 1) * h, (i + 2) * h))* mu_0 / (h * h);
-			A(i, i + 1) = integral1([&](double r) { return  ((i + 2) * h - r) * (r - (i + 1) * h) * r; }, (i + 1) * h, (i + 2) * h)  * mu_0 / (h * h);
+			A(i, i) = (integral1([&](double r) { return  (r - i * h) * (r - i * h) * r; },i * h, (i + 1) * h)
+				+ integral1([&](double r) { return  ((i + 2) * h - r) * ((i + 2) * h - r) * r; }, (i + 1) * h, (i + 2) * h)) * mu_0 / (h * h);
+			A(i, i + 1) = integral1([&](double r) { return  ((i + 2) * h - r) * (r - (i + 1) * h) * r; }, (i + 1) * h, (i + 2) * h) * mu_0 / (h * h);
 			A(i + 1, i) = A(i, i + 1);
 		}
 	}
@@ -75,16 +76,19 @@ public:
 	void compute_B(double t)
 	{
 		B = Matrix(n, n);
-		B(0, 0) = integral1([&](double r) { return  4 * r  / (h * h * sigma(r, t)); }, 0, h) + integral1([&](double r) { return  (2 * h - 2 * r) * (2 * h - 2 * r) / (h * h * sigma(r, t) * r); }, h, 2 * h);
+		B(0, 0) = integral1([&](double r) { return  4 * r / (h * h * sigma(r, t)); }, 0, h) 
+			+ integral1([&](double r) { return  (2 * h - 2 * r) * (2 * h - 2 * r) /(h * h * sigma(r, t) * r); }, h, 2 * h);
 		B(n - 1, n - 1) = integral1([&](double r) { return  (2 * r - (n - 1) * h) * (2 * r - (n - 1) * h) / (h * h * sigma(r, t) * r); }, (n - 1) * h, R);
 
 		for (int i = 0; i < n - 1; ++i)
 		{
-			
+
 			if (i != 0)
-				B(i, i) = (integral1([&](double r) { return  (2 * r - i * h) * (2 * r - i * h) / (sigma(r, t) * r); }, i * h, (i + 1) * h) + integral1([&](double r) { return  (2 * r - (i + 2) * h) * (2 * r - (i + 2) * h) / (sigma(r, t) * r); }, (i + 1) * h, (i + 2) * h)) / (h * h);
-			B(i, i + 1) = integral1([&](double r) { return  (2 * r - (i + 1) * h) * ((i + 2) * h - 2 * r) / (sigma(r, t) * r); }, (i + 1) * h, (i + 2) * h) / (h * h);
-			B(i + 1, i) = B(i, i + 1);
+				B(i, i) = (integral1([&](double r) { return  (2 * r - i * h) * (2 * r - i * h) / (sigma(r, t) * r); }, i * h, (i + 1) * h) 
+					+ integral1([&](double r) { return  (2 * r - (i + 2) * h) * (2 * r - (i + 2) * h) / (sigma(r, t) * r); }, (i + 1) * h, (i + 2) * h))
+				/ (h * h);
+				B(i, i + 1) = integral1([&](double r) { return  (2 * r - (i + 1) * h) * ((i + 2)* h - 2 * r) / (sigma(r, t) * r); }, (i + 1) * h, (i + 2) * h) / (h * h);
+				B(i + 1, i) = B(i, i + 1);
 		}
 	}
 
@@ -93,8 +97,8 @@ public:
 		b = Matrix(n, 1);
 		for (int i = 0; i < n - 1; ++i)
 		{
-			b(i, 0) = (integral1([&](double r) { return  (2 * r - i * h) * j_ext(r, t)/ sigma(r, t); }, i * h, (i + 1) * h) + 
-						integral1([&](double r) { return  ((i + 2) * h - 2 * r) * j_ext(r, t)/ sigma(r, t); }, (i + 1) * h, (i + 2) * h) ) / h;
+			b(i, 0) = (integral1([&](double r) { return  (2 * r - i * h) * j_ext(r, t) / sigma(r, t); }, i * h, (i + 1) * h) +
+				integral1([&](double r) { return  ((i + 2) * h - 2 * r) * j_ext(r, t) / sigma(r, t); }, (i + 1) * h, (i + 2) * h)) / h;
 		}
 		b(n - 1, 0) = E_z_R(t) * R + integral1([&](double r) { return  (2 * r - (n - 1) * h) * j_ext(r, t) / sigma(r, t); }, (n - 1) * h, R) / h;
 	}
@@ -107,7 +111,7 @@ public:
 			compute_A();
 			compute_B(t);
 			compute_b(t);
-			c[i] = MinResidMethod(1.0 / dt * A + alpha* B, b + (1.0 / dt * A - (1 - alpha) * B) * c[i - 1], 10000, 10e-5);
+			c[i] = MinResidMethod(1.0 / dt * A + alpha * B, b + (1.0 / dt * A - (1 - alpha) * B) * c[i - 1], 10000, 10e-5);
 		}
 	}
 
@@ -117,9 +121,8 @@ public:
 		compute_B(0);
 		compute_b(0);
 
-		Matrix x = MinResidMethod(B, b, 10000, 10e-5);
+		Matrix x = MinResidMethod(B, b, 10000, 10e-10);
 		x.print();
-		c[0].print();
 	}
 
 	void printanswer()

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <functional>
 
-double integral1(std::function<double(double)>  func, double a, double b, int n=100)
+double integral1(std::function<double(double)>  func, double a, double b, int n=1000)
 {
 	double h = (b - a) / n;
 	double ans = 0;
@@ -13,7 +13,7 @@ double integral1(std::function<double(double)>  func, double a, double b, int n=
 	return h / 6 * ans;
 }
 
-double integral2(std::function<double(double, double)>  func, double a, double b, double c, double d, int n=100, int m=100)
+double integral2(std::function<double(double, double)>  func, double a, double b, double c, double d, int n=1000, int m=1000)
 {
 	double h1 = (b - a) / n;
 	double h2 = (d - c) / m;

@@ -13,8 +13,8 @@ class TestTask2
 	double h_r;
 	double h_z;
 	double dt;
-	const double mu_0 = 0.00000125663706212;
-	//const double mu_0 = 1;
+	//const double mu_0 = 0.00000125663706212;
+	const double mu_0 = 1;
 
 	int n;
 	int m;
@@ -110,7 +110,7 @@ public:
 
 				if (abs(ind_grid_1[0] - ind_grid_2[0]) < 2 && abs(ind_grid_1[1] - ind_grid_2[1]) < 2)
 				{
-					A(i, j) = mu_0 * integral2(f, (ind_grid_1[1] - 1) * h_r, (ind_grid_1[1] + 1) * h_r, z1 + (ind_grid_1[0] - 1) * h_z, z1 + (ind_grid_1[0] + 1) * h_z, 200, 200) / (h_r * h_r * h_z * h_z) / (h_r * h_r * h_z * h_z);
+					A(i, j) = mu_0 * integral2(f, (ind_grid_1[1] - 1) * h_r, (ind_grid_1[1] + 1) * h_r, z1 + (ind_grid_1[0] - 1) * h_z, z1 + (ind_grid_1[0] + 1) * h_z, 200, 200) / (h_r  * h_z) / (h_r * h_z);
 				}
 				else
 				{
@@ -119,7 +119,6 @@ public:
 				A(j, i) = A(i, j);
 			}
 		}
-		A.print();
 	}
 
 	void compute_B(double t)
@@ -143,7 +142,7 @@ public:
 
 				if (abs(ind_grid_1[0] - ind_grid_2[0]) < 2 && abs(ind_grid_1[1] - ind_grid_2[1]) < 2)
 				{
-					B(i, j) =  integral2(f, (ind_grid_1[1] - 1) * h_r, (ind_grid_1[1] + 1) * h_r, z1 + (ind_grid_1[0] - 1) * h_z, z1 + (ind_grid_1[0] + 1) * h_z, 1000, 1000) / (h_r * h_r * h_z * h_z) / (h_r * h_r * h_z * h_z);
+					B(i, j) =  integral2(f, (ind_grid_1[1] - 1) * h_r, (ind_grid_1[1] + 1) * h_r, z1 + (ind_grid_1[0] - 1) * h_z, z1 + (ind_grid_1[0] + 1) * h_z, 1000, 1000) / (h_r * h_z) / (h_r  * h_z);
 				}
 				else
 				{
@@ -152,7 +151,6 @@ public:
 				B(j, i) = B(i, j);
 			}
 		}
-		B.print();
 	}
 	
 
@@ -169,15 +167,14 @@ public:
 				std::function<double(double z)> f1 = [&](double z) {return E_z_R(z, t) * v(ind_grid[0], ind_grid[1], R, z) * R; };
 				
 
-				b(i, 0) = integral1(f1, z1 + (ind_grid[0] - 1) * h_z, z1 + (ind_grid[0] + 1) * h_z, 1000) / (h_r * h_r * h_z * h_z) +
-					integral2(f2, (ind_grid[1] - 1) * h_r, (ind_grid[1] + 1) * h_r, z1 + (ind_grid[0] - 1) * h_z, z1 + (ind_grid[0] + 1) * h_z, 1000, 1000) / (h_r * h_r * h_z * h_z) / (h_r * h_r * h_z * h_z);
+				b(i, 0) = integral1(f1, z1 + (ind_grid[0] - 1) * h_z, z1 + (ind_grid[0] + 1) * h_z, 1000) / (h_r * h_z) +
+					integral2(f2, (ind_grid[1] - 1) * h_r, (ind_grid[1] + 1) * h_r, z1 + (ind_grid[0] - 1) * h_z, z1 + (ind_grid[0] + 1) * h_z, 1000, 1000) / (h_r  * h_z);
 			}
 			else
 			{
-				b(i, 0) = integral2(f2, (ind_grid[1] - 1) * h_r, (ind_grid[1] + 1) * h_r, z1 + (ind_grid[0] - 1) * h_z, z1 + (ind_grid[0] + 1) * h_z, 1000, 1000) / (h_r * h_r * h_z * h_z) / (h_r * h_r * h_z * h_z);
+				b(i, 0) = integral2(f2, (ind_grid[1] - 1) * h_r, (ind_grid[1] + 1) * h_r, z1 + (ind_grid[0] - 1) * h_z, z1 + (ind_grid[0] + 1) * h_z, 1000, 1000) / (h_r  * h_z);
 			}
 		}
-		b.print();
 	}
 
 	void compute(double alpha)
@@ -188,7 +185,7 @@ public:
 			compute_A();
 			compute_B(t);
 			compute_b(t);
-			c[i] = MinResidMethod(1.0 / dt * A + alpha * B, b + (1.0 / dt * A - (1 - alpha) * B) * c[i - 1], 10000, 10e-5);
+			c[i] = MinResidMethod(1.0 / dt * A + alpha * B, b + (1.0 / dt * A - (1 - alpha) * B) * c[i - 1], 10000, 10e-10);
 		}
 	}
 
@@ -215,8 +212,25 @@ public:
 		{
 			return 0;
 		}
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return ((j + 1) * h_r - r) * (z1 + (i + 1) * h_z - z);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return (r - (j - 1) * h_r) * (z1 + (i + 1) * h_z - z);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return (r - (j - 1) * h_r) * (z - z1 - (i - 1) * h_z);
+		}
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return ((j + 1) * h_r - r) * (z - z1 - (i - 1) * h_z);
+		}
 
-		return (r - (j + 1) * h_r) * (r - (j - 1) * h_r) * (z - z1 - (i + 1) * h_z) * (z - z1 - (i - 1) * h_z) ;
+
+
 	}
 	double dvdr(int i, int j, double r, double z)
 
@@ -225,7 +239,22 @@ public:
 		{
 			return 0;
 		}
-		return 2 * (r - j * h_r) * (z - z1 - (i + 1) * h_z) * (z - z1 - (i - 1) * h_z);
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return  -(z1 + (i + 1) * h_z - z);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return (z1 + (i + 1) * h_z - z);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return  (z - z1 - (i - 1) * h_z);
+		}
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return   -(z - z1 - (i - 1) * h_z);
+		}
 	}
 	double dvdz(int i, int j, double r, double z)
 	{
@@ -233,7 +262,22 @@ public:
 		{
 			return 0;
 		}
-		return (r - (j + 1) * h_r) * (r - (j - 1) * h_r) * 2 * (z - z1 - i * h_z);
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return -((j + 1) * h_r - r);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return -(r - (j - 1) * h_r);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return (r - (j - 1) * h_r);
+		}
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return ((j + 1) * h_r - r);
+		}
 	}
 	double drvdr(int i, int j, double r, double z)
 	{
@@ -241,7 +285,22 @@ public:
 		{
 			return 0;
 		}
-		return (3 * r * r - 4 * r * j * h_r + (j - 1) * (j + 1) * h_r * h_r) * (z - z1 - (i + 1) * h_z) * (z - z1 - (i - 1) * h_z);
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return ((j + 1) * h_r - 2 * r) * (z1 + (i + 1) * h_z - z);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + i * h_z <= z && z <= z1 + (i + 1) * h_z)
+		{
+			return (2 * r - (j - 1) * h_r) * (z1 + (i + 1) * h_z - z);
+		}
+		if ((j - 1) * h_r <= r && r <= j * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return (2 * r - (j - 1) * h_r) * (z - z1 - (i - 1) * h_z);
+		}
+		if (j * h_r <= r && r <= (j + 1) * h_r && z1 + (i - 1) * h_z <= z && z <= z1 + i * h_z)
+		{
+			return ((j + 1) * h_r - 2 * r) * (z - z1 - (i - 1) * h_z);
+		}
 	}
 
 	void printanswer()
@@ -264,19 +323,20 @@ public:
 	{
 		std::ofstream myfile;
 		myfile.open(a);
+		myfile << n << ' ' << m << ' ' << l << std::endl;
 
-
-		for (int i = 0; i < l; ++i)
+		for (int k = 0; k < l; ++k)
 		{
-			//if (i % 2 == 0)
+			for (int i = 0; i < n + 1; ++i)
 			{
 				myfile << 0 << " ";
-				for (int j = 0; j < n; ++j)
+				for (int j = 0; j < m; ++j)
 				{
-					myfile << c[i](j, 0) << ' ';
+					myfile << c[k](i * m + j, 0) << ' ';
 				}
 				myfile << std::endl;
 			}
+			myfile << std::endl;
 		}
 		myfile << std::endl;
 		myfile.close();

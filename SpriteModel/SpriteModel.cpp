@@ -23,8 +23,8 @@ void testtask1()
 	//task.compute(1.0/2);
 	//task.printanswer();
 	//task.compute_const();
-	task.compute(1.0 / 2);
-	task.printanswer();
+	//task.compute(1.0 / 2);
+	//task.printanswer();
 	task.compute_const();
 	task.write_answer_in_file("1d.txt");
 }
@@ -36,7 +36,7 @@ void testtask2()
 	double j_z_ext = 1;
 	std::function<double(double r, double z, double t)> sigma = [&](double r, double z, double t) {return sgm; };
 	std::function<double(double r, double z, double t)> j_ext = [&](double r, double z, double t) {return  j_z_ext; };
-	std::function<double(double r, double)> init_conditions = [&](double r, double z) {return r / 2 * (E_z * sgm + j_z_ext); };
+	std::function<double(double r, double)> init_conditions = [&](double r, double z) {return 8 * r * r / 3 * (E_z * sgm + j_z_ext); };
 
 	std::function<double(double z, double t)> E_z_R = [&](double z, double t) {return E_z; };
 	std::function<double(double z, double t)> E_r_h1 = [&](double r, double t) {return 0; };
@@ -47,8 +47,8 @@ void testtask2()
 
 	int n = 10;
 	int m = 10;
-	int l = 3;
-	double T = 2;
+	int l = 40;
+	double T = 4;
 	double R = 1;
 	double h1 = 0;
 	double h2 = 1;
@@ -56,10 +56,10 @@ void testtask2()
 	//task.compute(1.0/2);
 	//task.printanswer();
 	task.compute_const();
-	//task.compute(1.0 / 2);
+	task.compute(1.0 / 2);
 	//task.printanswer();
 	//task.compute_const();
-	//task.write_answer_in_file("2d");
+	task.write_answer_in_file("2d.txt");
 }
 
 int main()
